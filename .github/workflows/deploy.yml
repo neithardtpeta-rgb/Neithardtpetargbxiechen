@@ -15,10 +15,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: 安装项目依赖
-        run: npm ci
+        run: npm install
 
       - name: 构建项目生成静态文件
         run: |
