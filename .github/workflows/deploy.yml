@@ -16,8 +16,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: 安装项目依赖
-        run: npm install
+      - name: 生成锁文件并安装依赖
+        run: |
+          npm install --package-lock-only
+          npm ci
 
       - name: 构建项目生成静态文件
         run: |
