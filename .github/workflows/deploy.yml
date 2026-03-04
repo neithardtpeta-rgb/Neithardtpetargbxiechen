@@ -1,33 +1,32 @@
-name: 部署携程项目到GitHub Pages
+name: Auto Deploy to GitHub Pages
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]  # 监听 main 分支提交
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 拉取仓库代码
-        uses: actions/checkout@v4
-
-      - name: 安装Node.js环境
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: 生成锁文件并安装依赖
+      
+      # 核心修复：不依赖锁文件，直接安装依赖
+      - name: Install Dependencies
+        run: npm install --force  # 强制安装，解决 Figma 依赖冲突
+      
+      # 适配 Vite 项目构建，设置正确的基础路径
+      - name: Build Project
         run: |
-          npm install --package-lock-only
-          npm ci
-
-      - name: 构建项目生成静态文件
-        run: |
-          echo "HOME_PAGE=https://neithardtpeta-rgb.github.io/Neithardtpetargbxiechen/" > .env.production
-          npm run build
-
-      - name: 部署到GitHub Pages
+          npm run build -- --base=/Neithardtpetargbxiechen/
+      
+      # 部署到 GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          publish_dir: ./dist  # Vite 构建产物默认在 dist，不是 build！（之前的核心错误）
